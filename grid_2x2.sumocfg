@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+    <input>
+        <net-file value="grid_2x2.net.xml"/>
+        <route-files value="grid_2x2.rou.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="1000"/>
+        <step-length value="0.1"/>
+    </time>
+
+    <processing>
+        <lateral-resolution value="0.25"/>
+        <ignore-route-errors value="true"/>
+        <time-to-teleport value="-1"/>
+    </processing>
+
+    <report>
+        <verbose value="true"/>
+        <no-step-log value="true"/>
+        <duration-log.statistics value="true"/>
+        <no-duration-log value="false"/>
+    </report>
+
+    <gui_only>
+        <gui-settings-file value="grid_2x2.view.xml"/>
+        <delay value="50"/>
+    </gui_only>
+
+    <output>
+        <netstate-dump value="output/grid_2x2.netstate.xml" compressed="true"/>
+        <summary-output value="output/grid_2x2.summary.xml"/>
+        <tripinfo-output value="output/grid_2x2.tripinfo.xml"/>
+    </output>
+</configuration>

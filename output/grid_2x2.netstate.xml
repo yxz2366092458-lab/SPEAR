@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-12-30T12:16:28.542072+08:00 by Eclipse SUMO GUI 1.25.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="E:\ernie\ERNIE-main\grid_2x2.net.xml"/>
+        <route-files value="E:\ernie\ERNIE-main\grid_2x2.rou.xml"/>
+    </input>
+
+    <output>
+        <netstate-dump value="E:\ernie\ERNIE-main\output/grid_2x2.netstate.xml"/>
+        <summary-output value="E:\ernie\ERNIE-main\output/grid_2x2.summary.xml"/>
+        <tripinfo-output value="E:\ernie\ERNIE-main\output/grid_2x2.tripinfo.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="1000"/>
+        <step-length value="0.1"/>
+    </time>
+
+    <processing>
+        <lateral-resolution value="0.25"/>
+        <ignore-route-errors value="true"/>
+        <time-to-teleport value="-1"/>
+    </processing>
+
+    <report>
+        <verbose value="true"/>
+        <duration-log.disable value="false"/>
+        <duration-log.statistics value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <gui_only>
+        <gui-settings-file value="E:\ernie\ERNIE-main\grid_2x2.view.xml"/>
+        <delay value="50"/>
+    </gui_only>
+
+</sumoConfiguration>
+-->
+
+<netstate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netstate_file.xsd">
+</netstate>

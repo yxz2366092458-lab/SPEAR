@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<viewsettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/viewsettings.xsd">
+    <viewport y="200" x="200" zoom="100"/>
+    <delay value="50"/>
+    <scheme name="real world"/>
+
+    <!-- 背景和道路 -->
+    <background color="white"/>
+    <show-grid value="false"/>
+
+    <!-- 车辆显示设置 -->
+    <vehicle size="1.5" exaggeration="1.0"/>
+    <vehicle colorer name="by speed"/>
+    <vehicle scalarer name="by speed"/>
+
+    <!-- 车道显示设置 -->
+    <lane showLinkDecals="true" width="1.5"/>
+    <lane colorer name="by allowed speed"/>
+    <lane scalarer name="by allowed speed"/>
+
+    <!-- 交通灯显示 -->
+    <junction size="2.0" exaggeration="1.0"/>
+    <junction colorer name="by type"/>
+
+    <!-- 其他设置 -->
+    <edge name="false"/>
+    <edge id="false"/>
+    <internal edge="false"/>
+</viewsettings>
