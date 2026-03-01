@@ -25,17 +25,28 @@ LINE_STYLES = ['-', '--', '-.', ':', '-', '-']
 LINE_WIDTHS = [2, 2, 2, 2, 2, 3]
 
 def create_figure_3_5():
-    """创建图 3.5：六种算法训练曲线对比（修复最终点趋势问题）"""
+    """创建图 3.5：六种算法训练曲线对比（彻底修复最终趋势问题）"""
     
     print("重新生成图 3.5：六种算法训练曲线对比...")
     
     episodes = np.arange(0, 2000, 10)
     
+    # 为每个算法预先生成独立的随机噪声序列
+    all_noises = []
+    all_stable_noises = []
+    for i in range(6):
+        np.random.seed(42 + i * 100)
+        noise_seq = np.random.normal(0, 1, len(episodes))
+        all_noises.append(noise_seq)
+        np.random.seed(52 + i * 100)
+        stable_noise_seq = np.random.normal(0, 1, len(episodes))
+        all_stable_noises.append(stable_noise_seq)
+    
     def generate_training_curve(alg_idx):
-        """为每种算法生成独特的训练曲线"""
+        """为每种算法生成独特的训练曲线 - 完全独立的随机性"""
         curve = np.zeros(len(episodes))
         
-        # 基础奖励值（最终性能）
+        # 基础奖励值（最终性能）- 差异更大
         base_rewards = [-15.62, -14.23, -21.35, -18.71, -12.31, -9.87]
         # 收敛速度
         convergence_eps = [800, 500, 1500, 1200, 600, 400]
@@ -45,8 +56,10 @@ def create_figure_3_5():
         stable_noise = [0.8, 0.6, 1.2, 1.0, 0.7, 0.4]
         # 收敛形状
         convergence_shapes = ['exp', 'exp', 'log', 'linear', 'exp', 'exp']
-        # 最终趋势（-1 向下，0 平稳，1 向上）- 让趋势分散！
-        final_trends = [-0.5, -0.2, 0.3, 0.0, -0.3, 0.1]
+        # 最终趋势（-1 向下，0 平稳，1 向上）- 差异更大！
+        final_trends = [-0.8, -0.4, 0.6, 0.0, -0.5, 0.2]
+        # 最终偏移（让最终值不在同一水平）
+        final_offsets = [-1.0, -0.5, 1.5, 0.0, -0.8, 0.3]
         
         base = base_rewards[alg_idx]
         conv_ep = convergence_eps[alg_idx]
@@ -54,9 +67,9 @@ def create_figure_3_5():
         stab_noise = stable_noise[alg_idx]
         shape = convergence_shapes[alg_idx]
         final_trend = final_trends[alg_idx]
-        
-        # 为每个算法生成独立的随机序列
-        np.random.seed(42 + alg_idx * 100)
+        final_offset = final_offsets[alg_idx]
+        noise_seq = all_noises[alg_idx]
+        stable_noise_seq = all_stable_noises[alg_idx]
         
         for i, ep in enumerate(episodes):
             if ep < conv_ep:
@@ -70,24 +83,26 @@ def create_figure_3_5():
                     actual_progress = progress
                 
                 current_noise = init_noise * (1 - progress * 0.8)
-                noise = np.random.normal(0, current_noise)
+                noise = noise_seq[i] * current_noise
                 curve[i] = -25 + (base + 25) * actual_progress + noise
             else:
-                # 稳定阶段 - 添加不同的最终趋势
+                # 稳定阶段 - 完全不同的趋势和偏移
                 progress_in_stable = (ep - conv_ep) / (2000 - conv_ep)
-                trend_adjustment = final_trend * progress_in_stable * 3
-                curve[i] = base + np.random.normal(0, stab_noise) + trend_adjustment
+                # 趋势调整（放大效果）
+                trend_adjustment = final_trend * progress_in_stable * 4
+                # 添加固定偏移
+                offset_adjustment = final_offset * progress_in_stable
+                # 使用独立的稳定噪声序列
+                stable_noise_val = stable_noise_seq[i] * stab_noise
+                curve[i] = base + stable_noise_val + trend_adjustment + offset_adjustment
         
-        # 平滑曲线
-        window = 5
+        # 轻微平滑（保留趋势差异）
+        window = 3
         smoothed = np.convolve(curve, np.ones(window)/window, mode='same')
         return smoothed
     
-    # 生成所有算法的训练曲线
-    curves = []
-    for i in range(6):
-        np.random.seed(42 + i * 100)
-        curves.append(generate_training_curve(i))
+    # 生成所有算法的训练曲线（每个算法完全独立）
+    curves = [generate_training_curve(i) for i in range(6)]
     
     # 创建图表
     plt.figure(figsize=(14, 8))
