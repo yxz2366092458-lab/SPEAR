@@ -10,6 +10,7 @@ from Env import TrafficGridEnv, TrafficAction
 from PBTManager import PBTManager
 from replay_buffer import ReplayBuffer
 from Algorithms.qcombo import QCOMBO
+from Algorithms.qcombo_greedy_risk import QCOMBO_GREEDY_RISK
 from Algorithms.coma import COMA
 from collections import deque
 import argparse
@@ -20,7 +21,7 @@ from eval_configs import eval1, eval2, eval3, eval4, eval5, eval6, eval7, eval8,
 import random
 
 parser = argparse.ArgumentParser(description='RL Experiment.')
-parser.add_argument('--alg', type=str, default='qcombo', choices=['qcombo', 'coma', 'qcombo_adv', 'PBT_adv'])
+parser.add_argument('--alg', type=str, default='qcombo', choices=['qcombo', 'coma', 'qcombo_adv', 'PBT_adv', 'qcombo_greedy_risk'])
 parser.add_argument('--nrow', type=int, default=2,
                     help='n_row of environment')
 parser.add_argument('--ncol', type=int, default=2,
@@ -534,6 +535,10 @@ if __name__ == "__main__":
         alg = COMA(n_rows=config.env.n_rows, n_cols=config.env.n_cols, config=config)
 
     elif args.alg == 'qcombo_adv':
+    elif args.alg == 'qcombo_greedy_risk':
+        from Algorithms.configs.config_qcombo_greedy_risk import get_config
+        config = get_config()
+        alg = QCOMBO_GREEDY_RISK(n_rows=args.nrow, n_cols=args.ncol, config=config)
         from Algorithms.configs import config_qcombo_adv
         config = config_qcombo_adv.get_config()
         alg = QCOMBOS(n_rows=config.env.n_rows, n_cols=config.env.n_cols, config=config)
