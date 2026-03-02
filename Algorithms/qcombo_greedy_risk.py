@@ -41,7 +41,7 @@ class QCOMBO_GREEDY_RISK:
         
         # Initialize Risk Network
         obs_dim = n_rows * n_cols * 10  # Approximate observation dimension
-        self.risk_net = RiskNet(input_dim=obs_dim, hidden_dims=[128, 64], lr=config.critic.lr)
+        self.risk_net = RiskNet(input_dim=obs_dim, hidden_dim=128, num_heads=4, num_layers=2, num_lights=self.num_lights, dropout=0.1, lr=config.critic.lr)
         
     def get_greedy_rule_action(self, local_obs):
         '''
@@ -67,7 +67,7 @@ class QCOMBO_GREEDY_RISK:
         global_flat = global_obs.view(batch_size, -1)
         
         # Compute risk
-        risk = self.risk_net.get_risk(global_flat)  # [batch_size, 1]
+        risk, _, _ = self.risk_net.forward(global_flat)  # [batch_size, 1]
         
         # Get Q values for each light
         adjusted_q_list = []
