@@ -535,13 +535,15 @@ if __name__ == "__main__":
         alg = COMA(n_rows=config.env.n_rows, n_cols=config.env.n_cols, config=config)
 
     elif args.alg == 'qcombo_adv':
+
+        from Algorithms.configs import config_qcombo_adv
+        config = config_qcombo_adv.get_config()
+        alg = QCOMBOS(n_rows=config.env.n_rows, n_cols=config.env.n_cols, config=config)
+
     elif args.alg == 'qcombo_greedy_risk':
         from Algorithms.configs.config_qcombo_greedy_risk import get_config
         config = get_config()
         alg = QCOMBO_GREEDY_RISK(n_rows=args.nrow, n_cols=args.ncol, config=config)
-        from Algorithms.configs import config_qcombo_adv
-        config = config_qcombo_adv.get_config()
-        alg = QCOMBOS(n_rows=config.env.n_rows, n_cols=config.env.n_cols, config=config)
 
     elif args.alg == 'PBT_adv':
         from Algorithms.configs import config_qcombo_adv
