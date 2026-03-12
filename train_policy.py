@@ -18,6 +18,7 @@ import os
 import time
 from eval_configs import eval1, eval2, eval3, eval4, eval5, eval6, eval7, eval8, eval_4x4, eval_6x6_0, eval_6x6_1, \
     eval_6x6_2, eval_6x6_3, eval_6x6_4, train_2x2, eval_custom_0, eval_custom_1
+from heuristic_rules import HeuristicRules
 import random
 
 parser = argparse.ArgumentParser(description='RL Experiment.')
@@ -34,6 +35,13 @@ parser.add_argument('--pbt_eval_interval', type=int, default=20,
                     help='PBT evaluation interval (training steps)')
 parser.add_argument('--seed', type=int, default=0,
                     help='Random seed')
+parser.add_argument('--use_heuristic', action='store_true',
+                    help='启用启发式规则模块（可与RL组合）')
+parser.add_argument('--heuristic_rule', type=str, default='max_pressure',
+                    choices=['max_pressure', 'wait_threshold', 'hybrid'],
+                    help='启发式规则: max_pressure=最大压力, wait_threshold=等待时间阈值, hybrid=压力差大时用启发式')
+parser.add_argument('--heuristic_min_switch_time', type=float, default=5.0,
+                    help='启发式最小绿灯时间（秒）')
 
 
 class LightTrainer:
@@ -45,7 +53,8 @@ class LightTrainer:
     - model : the model we are using for the Q-network
     '''
 
-    def __init__(self, alg, N_ROWS, N_COLUMNS, config, saving_dir=None, seed=0, pbt_config=None):
+    def __init__(self, alg, N_ROWS, N_COLUMNS, config, saving_dir=None, seed=0, pbt_config=None,
+                 use_heuristic=False, heuristic_rule='max_pressure', heuristic_min_switch_time=5.0):
         self.alg = alg
         self.N_ROWS = N_ROWS
         self.N_COLUMNS = N_COLUMNS
@@ -53,6 +62,14 @@ class LightTrainer:
         self.config = config
         self.seed = seed
         self.pbt_config = pbt_config or {}
+        self.use_heuristic = use_heuristic
+        self.heuristic_rules = None
+        if use_heuristic:
+            self.heuristic_rules = HeuristicRules(
+                num_lights=self.num_lights,
+                min_switch_time=heuristic_min_switch_time,
+                rule=heuristic_rule,
+            )
 
         # 根据算法类型调整保存目录
         alg_name = self.alg.name if hasattr(self.alg, 'name') else str(self.alg)
@@ -251,11 +268,24 @@ class LightTrainer:
                 # 做出下一个决策
                 old_actions_list = []
                 if i >= 1000 or episode > 0:
-                    for j in range(self.num_lights):
-                        new_state_tensor = new_local_obs[j, :]
-                        action = self.alg.choose_action(new_state_tensor)
-                        actions["center{}".format(j)] = action
-                        old_actions_list.append(action)
+                    if self.heuristic_rules is not None:
+                        if self.heuristic_rules.rule == "hybrid":
+                            for j in range(self.num_lights):
+                                new_state_tensor = new_local_obs[j, :]
+                                actions["center{}".format(j)] = self.alg.choose_action(new_state_tensor)
+                            rl_actions_dict = {f"center{j}": int(actions[f"center{j}"]) for j in range(self.num_lights)}
+                            h_dict = self.heuristic_rules.get_heuristic_actions(obs, last_change, rl_actions_dict)
+                            self.heuristic_rules.apply_to_traffic_action(actions, h_dict)
+                        else:
+                            h_dict = self.heuristic_rules.get_heuristic_actions(obs, last_change, None)
+                            self.heuristic_rules.apply_to_traffic_action(actions, h_dict)
+                        old_actions_list = [int(actions[f"center{j}"]) for j in range(self.num_lights)]
+                    else:
+                        for j in range(self.num_lights):
+                            new_state_tensor = new_local_obs[j, :]
+                            action = self.alg.choose_action(new_state_tensor)
+                            actions["center{}".format(j)] = action
+                            old_actions_list.append(action)
 
                 # 更新观察
                 old_local_obs = new_local_obs
@@ -591,7 +621,10 @@ if __name__ == "__main__":
         config=config,
         saving_dir=save_dir,
         seed=args.seed,
-        pbt_config=pbt_config if args.alg == 'PBT_adv' else None
+        pbt_config=pbt_config if args.alg == 'PBT_adv' else None,
+        use_heuristic=args.use_heuristic,
+        heuristic_rule=args.heuristic_rule,
+        heuristic_min_switch_time=args.heuristic_min_switch_time,
     )
 
     # 设置PBT检查点目录
